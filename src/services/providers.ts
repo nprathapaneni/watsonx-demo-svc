@@ -1,6 +1,12 @@
 import {Provider} from "@nestjs/common";
-import {provider as helloWorldProvider} from "./hello-world";
+
+import {helloWorldProvider} from "./hello-world";
+import {kycCaseProvider} from "./kyc-case";
 
 export * from './hello-world';
+export * from './kyc-case';
 
-export const providers: Provider[] = [helloWorldProvider];
+export const providers: Provider[] = [
+    helloWorldProvider,
+    kycCaseProvider,
+];

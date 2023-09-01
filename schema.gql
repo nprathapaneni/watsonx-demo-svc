@@ -2,11 +2,59 @@
 # THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
 # ------------------------------------------------------
 
+"""Case comment"""
+type Comment {
+  author: String
+  comment: String!
+  timestamp: String!
+}
+
+"""KYC Customer"""
+type Customer {
+  countryOfResidence: String!
+  dateOfBirth: String!
+  name: String!
+}
+
+input CustomerInput {
+  countryOfResidence: String!
+  dateOfBirth: String!
+  name: String!
+}
+
+"""KYC Document"""
+type Document {
+  name: String!
+  path: String!
+}
+
 """greeting"""
 type Greeting {
   greeting: String!
 }
 
+"""KYC Case"""
+type KycCase {
+  comments: [Comment!]!
+  customer: Customer!
+  documents: [Document!]!
+  id: String!
+  status: String!
+}
+
+type Mutation {
+  addDocumentToCase(documentName: String!, documentPath: String!, id: ID!): KycCase!
+  approveCase(comment: String!, id: ID!): KycCase!
+  createCase(customer: CustomerInput!): KycCase!
+  reviewCase(comment: String!, id: ID!): KycCase!
+}
+
 type Query {
+  getCase(id: ID!): KycCase!
   helloWorld: Greeting!
+  listCases: [KycCase!]!
+}
+
+type Subscription {
+  subscribeToCases: [KycCase!]!
 }

@@ -5,7 +5,7 @@ import { HelloWorldService } from './hello-world.service';
 
 export * from './hello-world.api';
 
-export const provider: Provider = {
+export const helloWorldProvider: Provider = {
   provide: HelloWorldApi,
   useClass: HelloWorldService,
 };

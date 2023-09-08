@@ -82,8 +82,11 @@ export class KycCaseManagementMock implements KycCaseManagementApi {
     }
 
     async reviewCase(id: string, comment?: string, timestamp: string = new Date().toISOString(), author?: string): Promise<KycCaseModel> {
-        const currentCase = first(this.subject.value.filter(c => c.id === id))
-            .orElseThrow(() => new CaseNotFound(id))
+        const currentCase: KycCaseModel | undefined = first(this.subject.value.filter(c => c.id === id));
+
+        if (!currentCase) {
+            throw new CaseNotFound(id);
+        }
 
         currentCase.status = 'Pending';
 
@@ -104,8 +107,11 @@ export class KycCaseManagementMock implements KycCaseManagementApi {
     }
 
     async approveCase(id: string, comment?: string, timestamp: string = new Date().toISOString(), author?: string): Promise<KycCaseModel> {
-        const currentCase = first(this.subject.value.filter(c => c.id === id))
-            .orElseThrow(() => new CaseNotFound(id))
+        const currentCase: KycCaseModel | undefined = first(this.subject.value.filter(c => c.id === id));
+
+        if (!currentCase) {
+            throw new CaseNotFound(id);
+        }
 
         currentCase.status = 'Closed';
 

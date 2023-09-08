@@ -1,8 +1,47 @@
+# ------------------------------------------------------
+# THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+# ------------------------------------------------------
+
+"""Case comment"""
+type Comment {
+  author: String
+  comment: String!
+  id: ID!
+  timestamp: String!
+}
+
 """KYC Customer"""
 type Customer {
-  name: String!
-  dateOfBirth: String!
   countryOfResidence: String!
+  dateOfBirth: String!
+  name: String!
+}
+
+input CustomerInput {
+  countryOfResidence: String!
+  dateOfBirth: String!
+  name: String!
+}
+
+"""Data extraction question"""
+type DataExtractionQuestion {
+  id: ID!
+  inScope: Boolean!
+  question: String!
+}
+
+"""Data extraction question input"""
+input DataExtractionQuestionIdInput {
+  id: ID!
+}
+
+"""Data extraction result"""
+type DataExtractionResult {
+  expectedResponse: String!
+  id: ID!
+  inScope: Boolean!
+  question: String!
+  watsonxResponse: String!
 }
 
 """KYC Document"""
@@ -12,41 +51,37 @@ type Document {
   path: String!
 }
 
-"""Case comment"""
-type Comment {
-  id: ID!
-  comment: String!
-  timestamp: String!
-  author: String
+"""greeting"""
+type Greeting {
+  greeting: String!
 }
 
 """KYC Case"""
 type KycCase {
-  id: ID!
-  status: String!
+  comments: [Comment!]!
   customer: Customer!
   documents: [Document!]!
-  comments: [Comment!]!
-}
-
-type Query {
-  listCases: [KycCase!]!
-  getCase(id: ID!): KycCase!
+  id: ID!
+  status: String!
 }
 
 type Mutation {
-  createCase(customer: CustomerInput!): KycCase!
   addDocumentToCase(caseId: ID!, documentName: String!, documentPath: String!): KycCase!
-  reviewCase(caseId: ID!, comment: String, timestamp: String, author: String): KycCase!
-  approveCase(caseId: ID!, comment: String, timestamp: String, author: String): KycCase!
+  approveCase(author: String, caseId: ID!, comment: String, timestamp: String): KycCase!
+  createCase(customer: CustomerInput!): KycCase!
+  reviewCase(author: String, caseId: ID!, comment: String, timestamp: String): KycCase!
 }
 
-input CustomerInput {
-  name: String!
-  dateOfBirth: String!
-  countryOfResidence: String!
+type Query {
+  extractDataForQuestion(customer: String!, question: DataExtractionQuestionIdInput!): DataExtractionResult!
+  extractDataForQuestions(customer: String!, questions: [DataExtractionQuestionIdInput!]!): [DataExtractionResult!]!
+  getCase(id: ID!): KycCase!
+  helloWorld: Greeting!
+  listCases: [KycCase!]!
+  listQuestions: [DataExtractionQuestion!]!
 }
 
 type Subscription {
+  extractDataObservable(customer: String!, questions: [DataExtractionQuestionIdInput!]!): [DataExtractionResult!]!
   subscribeToCases: [KycCase!]!
 }

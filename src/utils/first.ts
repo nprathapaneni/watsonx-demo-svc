@@ -1,9 +1,9 @@
-import Optional from "optional-js";
+import Optional from 'optional-js';
 
-export const first = <T> (list: T[] = []): Optional<T> => {
+export const first = <T> (list: T[] = []): T | undefined => {
     if (list.length === 0) {
-        return Optional.empty();
+        return;
     }
 
-    return Optional.ofNullable(list[0]);
+    return list[0];
 }

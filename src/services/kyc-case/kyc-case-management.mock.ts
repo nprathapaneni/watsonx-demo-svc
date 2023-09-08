@@ -67,12 +67,14 @@ export class KycCaseManagementMock implements KycCaseManagementApi {
         return newCase;
     }
 
-    async addDocumentToCase(id: string, documentName: string, documentPath: string): Promise<KycCaseModel> {
-        const currentCase = await this.getCase(id);
+    async addDocumentToCase(caseId: string, documentName: string, documentPath: string): Promise<KycCaseModel> {
+        const currentCase = await this.getCase(caseId);
 
         currentCase.status = 'Pending';
 
-        currentCase.documents.push({name: documentName, path: documentPath});
+        const id = '' + (currentCase.documents.length + 1);
+
+        currentCase.documents.push({id: `${caseId}-${id}`, name: documentName, path: documentPath});
 
         this.subject.next(this.subject.value);
 
@@ -85,13 +87,20 @@ export class KycCaseManagementMock implements KycCaseManagementApi {
 
         currentCase.status = 'Pending';
 
-        if (comment) {
-            currentCase.comments.push(Object.assign({comment, timestamp}, author ? {author} : {}))
-        }
+        this.addComment(currentCase, comment, timestamp, author);
 
         this.subject.next(this.subject.value);
 
         return currentCase;
+    }
+
+    addComment(currentCase: KycCaseModel, comment?: string, timestamp?: string, author?: string) {
+        if (comment) {
+            const caseId = currentCase.id;
+            const commentId = '' + (currentCase.comments.length + 1)
+
+            currentCase.comments.push(Object.assign({id: `${caseId}-${commentId}`, comment, timestamp}, author ? {author} : {}))
+        }
     }
 
     async approveCase(id: string, comment?: string, timestamp: string = new Date().toISOString(), author?: string): Promise<KycCaseModel> {
@@ -100,9 +109,7 @@ export class KycCaseManagementMock implements KycCaseManagementApi {
 
         currentCase.status = 'Closed';
 
-        if (comment) {
-            currentCase.comments.push(Object.assign({comment, timestamp}, author ? {author} : {}))
-        }
+        this.addComment(currentCase, comment, timestamp, author);
 
         this.subject.next(this.subject.value);
 

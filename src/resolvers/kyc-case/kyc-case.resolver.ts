@@ -42,7 +42,7 @@ export class KycCaseResolver {
 
     @Mutation(() => KycCase)
     async addDocumentToCase(
-        @Args('id', { type: () => ID }) caseId: string,
+        @Args('caseId', { type: () => ID }) caseId: string,
         @Args('documentName', { type: () => String }) documentName: string,
         @Args('documentPath', { type: () => String }) documentPath: string,
     ): Promise<KycCaseModel> {
@@ -51,17 +51,21 @@ export class KycCaseResolver {
 
     @Mutation(() => KycCase)
     async reviewCase(
-        @Args('id', { type: () => ID }) caseId: string,
-        @Args('comment', { type: () => String }) comment: string
+        @Args('caseId', { type: () => ID }) caseId: string,
+        @Args('comment', { type: () => String, nullable: true }) comment?: string,
+        @Args('timestamp', { type: () => String, nullable: true }) timestamp?: string,
+        @Args('author', { type: () => String, nullable: true }) author?: string,
     ): Promise<KycCaseModel> {
-        return this.service.reviewCase(caseId, comment);
+        return this.service.reviewCase(caseId, comment, timestamp, author);
     }
 
     @Mutation(() => KycCase)
     async approveCase(
-        @Args('id', { type: () => ID }) caseId: string,
-        @Args('comment', { type: () => String }) comment: string
+        @Args('caseId', { type: () => ID }) caseId: string,
+        @Args('comment', { type: () => String, nullable: true }) comment?: string,
+        @Args('timestamp', { type: () => String, nullable: true }) timestamp?: string,
+        @Args('author', { type: () => String, nullable: true }) author?: string,
     ): Promise<KycCaseModel> {
-        return this.service.approveCase(caseId, comment);
+        return this.service.approveCase(caseId, comment, timestamp, author);
     }
 }

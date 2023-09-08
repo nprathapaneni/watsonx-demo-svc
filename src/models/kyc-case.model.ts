@@ -9,6 +9,7 @@ export interface KycCaseModel {
 }
 
 export interface CommentModel {
+    id: string;
     comment: string;
     timestamp: string;
     author?: string;
@@ -21,6 +22,7 @@ export interface CustomerModel {
 }
 
 export interface DocumentModel {
+    id: string;
     name: string;
     path: string;
 }

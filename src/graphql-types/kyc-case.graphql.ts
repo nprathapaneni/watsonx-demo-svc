@@ -1,4 +1,4 @@
-import {Field, InputType, ObjectType} from "@nestjs/graphql";
+import {Field, ID, InputType, ObjectType} from "@nestjs/graphql";
 import {
     CommentModel,
     CustomerModel,
@@ -20,6 +20,8 @@ export class Customer implements CustomerModel {
 
 @ObjectType({ description: 'KYC Document' })
 export class Document implements DocumentModel {
+    @Field(() => ID)
+    id: string;
     @Field()
     name: string;
     @Field()
@@ -40,6 +42,8 @@ export class CustomerRiskAssessment implements CustomerRiskAssessmentModel {
 
 @ObjectType({description: 'Case comment'})
 export class Comment implements CommentModel {
+    @Field(() => ID)
+    id: string;
     @Field()
     comment: string;
     @Field()
@@ -50,7 +54,7 @@ export class Comment implements CommentModel {
 
 @ObjectType({ description: 'KYC Case' })
 export class KycCase implements KycCaseModel {
-    @Field()
+    @Field(() => ID)
     id: string;
     @Field()
     status: string;

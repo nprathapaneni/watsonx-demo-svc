@@ -1,6 +1,7 @@
 import {Provider} from "@nestjs/common";
 import {DataExtractionApi} from "./data-extraction.api";
 import {DataExtractionMock} from "./data-extraction.mock";
+import {DataExtractionImpl} from "./data-extraction.impl";
 
 export * from './data-extraction.api';
 
@@ -10,7 +11,7 @@ const dataExtractionApi = (): DataExtractionApi => {
         return _instance;
     }
 
-    return _instance = new DataExtractionMock();
+    return _instance = new DataExtractionImpl();
 }
 
 export const dataExtractionProvider: Provider = {

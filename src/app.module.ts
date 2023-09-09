@@ -12,7 +12,9 @@ const imports = [
         autoSchemaFile: 'schema.gql',
         sortSchema: true,
         subscriptions: {
-            'graphql-ws': true,
+            'graphql-ws': {
+                path: '/subscription'
+            },
         },
     }),
     ServiceModule,

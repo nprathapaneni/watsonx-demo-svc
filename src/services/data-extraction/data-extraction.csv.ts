@@ -43,7 +43,7 @@ const data: DataExtractionConfig[] = csvFile
     }))
     .filter(val => val.id !== 'ID')
 
-export abstract class DataExtractionCsv extends DataExtractionApi {
+export abstract class DataExtractionCsv<A> extends DataExtractionApi {
 
     getCsvData(): DataExtractionConfig[] {
         return data;
@@ -55,8 +55,10 @@ export abstract class DataExtractionCsv extends DataExtractionApi {
     }
 
     async extractData(customer: string, questions: Array<{id: string}>): Promise<DataExtractionResultModel[]> {
+        const auth: A = await this.getBackends();
+
         const extractDataForQuestion = (question: DataExtractionQuestionModel) => {
-            return this.extractDataForQuestion(customer, question)
+            return this.extractDataForQuestionInternal(customer, question, auth);
         }
 
         return Promise.all(questions.map(extractDataForQuestion.bind(this)))
@@ -73,20 +75,33 @@ export abstract class DataExtractionCsv extends DataExtractionApi {
     extractDataObservable(customer: string, questions: Array<{id: string}>): Observable<DataExtractionResultModel[]> {
         const subject: BehaviorSubject<DataExtractionResultModel[]> = new BehaviorSubject(this.emptyDataExtractionResults(questions));
 
-        questions
-            .map(question => this.extractDataForQuestion(customer, question))
-            .map(promise => promise.then((result: DataExtractionResultModel) => {
-                const currentResults: DataExtractionResultModel[] = subject.value;
+        this.getBackends().then((auth: A) => {
+            questions
+                .map(question => this.extractDataForQuestionInternal(customer, question, auth))
+                .map(promise => promise.then((result: DataExtractionResultModel) => {
+                    const currentResults: DataExtractionResultModel[] = subject.value;
 
-                const previousResult: DataExtractionResultModel | undefined = first(currentResults.filter(val => val.id === result.id))
-                if (previousResult) {
-                    previousResult.watsonxResponse = result.watsonxResponse;
-                }
+                    const previousResult: DataExtractionResultModel | undefined = first(currentResults.filter(val => val.id === result.id))
+                    if (previousResult) {
+                        previousResult.watsonxResponse = result.watsonxResponse;
+                    }
 
-                return subject.next(currentResults)
-            }))
+                    return subject.next(currentResults)
+                }));
+        })
 
         return subject;
     }
+
+    async extractDataForQuestion(customer: string, question: {id: string}): Promise<DataExtractionResultModel> {
+        const auth: A = await this.getBackends();
+
+        return this.extractDataForQuestionInternal(customer, question, auth);
+    }
+
+    abstract getBackends(): Promise<A>;
+
+    abstract
+    abstract extractDataForQuestionInternal(customer: string, question: {id: string}, backends: A): Promise<DataExtractionResultModel>;
 
 }

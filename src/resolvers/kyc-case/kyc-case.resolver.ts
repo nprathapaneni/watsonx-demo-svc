@@ -1,8 +1,8 @@
 import {Args, ID, Mutation, Query, Resolver, Subscription} from "@nestjs/graphql";
 import {PubSub} from "graphql-subscriptions";
 
-import {CustomerInput, KycCase} from "../../graphql-types";
-import {CustomerModel, KycCaseModel} from "../../models";
+import {ApproveCaseInput, CustomerInput, KycCase, ReviewCaseInput} from "../../graphql-types";
+import {ApproveCaseModel, CustomerModel, KycCaseModel, ReviewCaseModel} from "../../models";
 import {KycCaseManagementApi} from "../../services";
 
 const pubSub: PubSub = new PubSub();
@@ -10,10 +10,9 @@ const casesTrigger: string = 'cases';
 
 @Resolver(() => [KycCase])
 export class KycCaseResolver {
+    private triggered = false;
+
     constructor(private readonly service: KycCaseManagementApi) {
-        service.subscribeToCases()
-            .forEach(cases => pubSub.publish(casesTrigger, cases))
-            .catch(err => console.error('Error handling cases subscription', err))
     }
 
     @Query(() => [KycCase])
@@ -23,6 +22,20 @@ export class KycCaseResolver {
 
     @Subscription(() => [KycCase])
     subscribeToCases() {
+        if (!this.triggered) {
+            this.service.subscribeToCases()
+                .subscribe({
+                    next: cases => {
+                        console.log('Publishing case', {cases})
+
+                        pubSub.publish(casesTrigger, cases)
+                    },
+                    error: err => console.error('Error handling cases subscription', err),
+                    complete: () => console.log('Complete')
+                })
+            this.triggered = true;
+        }
+
         return pubSub.asyncIterator(casesTrigger);
     }
 
@@ -51,21 +64,15 @@ export class KycCaseResolver {
 
     @Mutation(() => KycCase)
     async reviewCase(
-        @Args('caseId', { type: () => ID }) caseId: string,
-        @Args('comment', { type: () => String, nullable: true }) comment?: string,
-        @Args('timestamp', { type: () => String, nullable: true }) timestamp?: string,
-        @Args('author', { type: () => String, nullable: true }) author?: string,
+        @Args('case', { type: () => ReviewCaseInput }) reviewCase: ReviewCaseModel
     ): Promise<KycCaseModel> {
-        return this.service.reviewCase(caseId, comment, timestamp, author);
+        return this.service.reviewCase(reviewCase);
     }
 
     @Mutation(() => KycCase)
     async approveCase(
-        @Args('caseId', { type: () => ID }) caseId: string,
-        @Args('comment', { type: () => String, nullable: true }) comment?: string,
-        @Args('timestamp', { type: () => String, nullable: true }) timestamp?: string,
-        @Args('author', { type: () => String, nullable: true }) author?: string,
+        @Args('case', { type: () => ApproveCaseInput }) approveCase: ApproveCaseModel
     ): Promise<KycCaseModel> {
-        return this.service.approveCase(caseId, comment, timestamp, author);
+        return this.service.approveCase(approveCase);
     }
 }

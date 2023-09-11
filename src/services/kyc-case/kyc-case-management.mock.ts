@@ -1,8 +1,7 @@
 import {BehaviorSubject, Observable} from "rxjs";
-import dayjs = require("dayjs");
 
 import {CaseNotFound, KycCaseManagementApi} from "./kyc-case-management.api";
-import {createNewCase, CustomerModel, KycCaseModel} from "../../models";
+import {ApproveCaseModel, createNewCase, CustomerModel, KycCaseModel, ReviewCaseModel} from "../../models";
 import {delay, first} from "../../utils";
 
 const initialValue: KycCaseModel[] = [
@@ -10,23 +9,23 @@ const initialValue: KycCaseModel[] = [
         id: '1',
         customer: {
             name: 'John Doe',
-            dateOfBirth: dayjs().subtract(25, 'years').toISOString(),
-            countryOfResidence: 'US'
+            countryOfResidence: 'US',
+            personalIdentificationNumber: '123458690',
+            riskCategory: 'Low'
         },
         status: 'New',
         documents: [],
-        comments: [],
     },
     {
         id: '2',
         customer: {
             name: 'Jane Doe',
-            dateOfBirth: dayjs().subtract(30, 'years').toISOString(),
-            countryOfResidence: 'CA'
+            countryOfResidence: 'CA',
+            personalIdentificationNumber: 'AB1458690',
+            riskCategory: 'Low'
         },
         status: 'New',
         documents: [],
-        comments: [],
     }
 ]
 
@@ -48,6 +47,8 @@ export class KycCaseManagementMock implements KycCaseManagementApi {
     }
 
     subscribeToCases(): Observable<KycCaseModel[]> {
+        console.log('Subscribing to cases: ', {value: this.subject.value})
+
         return this.subject;
     }
 
@@ -81,41 +82,31 @@ export class KycCaseManagementMock implements KycCaseManagementApi {
         return currentCase;
     }
 
-    async reviewCase(id: string, comment?: string, timestamp: string = new Date().toISOString(), author?: string): Promise<KycCaseModel> {
-        const currentCase: KycCaseModel | undefined = first(this.subject.value.filter(c => c.id === id));
+    async reviewCase(reviewCase: ReviewCaseModel): Promise<KycCaseModel> {
+        const currentCase: KycCaseModel | undefined = first(this.subject.value.filter(c => c.id === reviewCase.id));
 
         if (!currentCase) {
-            throw new CaseNotFound(id);
+            throw new CaseNotFound(reviewCase.id);
         }
 
-        currentCase.status = 'Pending';
+        const status = reviewCase.customerOutreach ? 'CustomerOutreach' : 'Pending';
 
-        this.addComment(currentCase, comment, timestamp, author);
+        Object.assign(currentCase, {reviewCase}, {status});
 
         this.subject.next(this.subject.value);
 
         return currentCase;
     }
 
-    addComment(currentCase: KycCaseModel, comment?: string, timestamp?: string, author?: string) {
-        if (comment) {
-            const caseId = currentCase.id;
-            const commentId = '' + (currentCase.comments.length + 1)
-
-            currentCase.comments.push(Object.assign({id: `${caseId}-${commentId}`, comment, timestamp}, author ? {author} : {}))
-        }
-    }
-
-    async approveCase(id: string, comment?: string, timestamp: string = new Date().toISOString(), author?: string): Promise<KycCaseModel> {
-        const currentCase: KycCaseModel | undefined = first(this.subject.value.filter(c => c.id === id));
+    async approveCase(input: ApproveCaseModel): Promise<KycCaseModel> {
+        const currentCase: KycCaseModel | undefined = first(this.subject.value.filter(c => c.id === input.id));
 
         if (!currentCase) {
-            throw new CaseNotFound(id);
+            throw new CaseNotFound(input.id);
         }
 
-        currentCase.status = 'Closed';
-
-        this.addComment(currentCase, comment, timestamp, author);
+        currentCase.status = 'Pending';
+        currentCase.documents = currentCase.documents.concat(input.documents)
 
         this.subject.next(this.subject.value);
 

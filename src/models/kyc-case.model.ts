@@ -1,30 +1,27 @@
 export interface KycCaseModel {
     id: string;
+    status: string;
     customer: CustomerModel;
     documents: DocumentModel[];
-    status: string;
-    comments: CommentModel[];
+    counterparty?: PersonModel;
+    customerOutreach?: string;
     negativeScreening?: NegativeScreeningModel;
+    counterpartyNegativeScreening?: NegativeScreeningModel;
     customerRiskAssessment?: CustomerRiskAssessmentModel;
 }
 
-export interface CommentModel {
-    id: string;
-    comment: string;
-    timestamp: string;
-    author?: string;
-}
-
-export interface CustomerModel {
+export interface PersonModel {
     name: string;
-    dateOfBirth: string;
     countryOfResidence: string;
 }
 
-export interface DocumentModel {
+export interface CustomerModel extends PersonModel {
+    personalIdentificationNumber: string;
+    riskCategory: string;
+}
+
+export interface DocumentModel extends DocumentInputModel {
     id: string;
-    name: string;
-    path: string;
 }
 
 export interface NegativeScreeningModel {
@@ -35,18 +32,36 @@ export interface CustomerRiskAssessmentModel {
     result: string;
 }
 
+export interface ReviewCaseModel {
+    id: string;
+    counterparty: PersonModel;
+    customerOutreach?: string;
+    documents: DocumentModel[];
+}
+
+export interface ApproveCaseModel {
+    id: string;
+    customerOutreach: string;
+    documents: DocumentModel[];
+}
+
+export interface DocumentInputModel {
+    name: string;
+    path: string;
+}
+
 
 export const createEmptyCase = (): KycCaseModel => {
     return {
         id: 'new',
         customer: {
             name: '',
-            dateOfBirth: new Date().toISOString(),
-            countryOfResidence: 'US'
+            countryOfResidence: 'US',
+            personalIdentificationNumber: '',
+            riskCategory: ''
         },
         status: 'New',
         documents: [],
-        comments: [],
     }
 }
 
@@ -56,6 +71,5 @@ export const createNewCase = (customer: CustomerModel): KycCaseModel => {
         customer,
         status: 'New',
         documents: [],
-        comments: [],
     }
 }

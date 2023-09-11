@@ -1,11 +1,11 @@
 import {Field, ID, InputType, ObjectType} from "@nestjs/graphql";
 import {
-    CommentModel,
+    ApproveCaseModel,
     CustomerModel,
-    CustomerRiskAssessmentModel,
+    CustomerRiskAssessmentModel, DocumentInputModel,
     DocumentModel,
     KycCaseModel,
-    NegativeScreeningModel
+    NegativeScreeningModel, PersonModel, ReviewCaseModel
 } from "../models";
 
 @ObjectType({description: 'KYC Customer'})
@@ -13,7 +13,17 @@ export class Customer implements CustomerModel {
     @Field()
     name: string;
     @Field()
-    dateOfBirth: string;
+    countryOfResidence: string;
+    @Field()
+    personalIdentificationNumber: string;
+    @Field()
+    riskCategory: string;
+}
+
+@ObjectType({description: 'KYC Person'})
+export class Person implements PersonModel {
+    @Field()
+    name: string;
     @Field()
     countryOfResidence: string;
 }
@@ -40,18 +50,6 @@ export class CustomerRiskAssessment implements CustomerRiskAssessmentModel {
     result: string;
 }
 
-@ObjectType({description: 'Case comment'})
-export class Comment implements CommentModel {
-    @Field(() => ID)
-    id: string;
-    @Field()
-    comment: string;
-    @Field()
-    timestamp: string;
-    @Field({ nullable: true })
-    author?: string;
-}
-
 @ObjectType({ description: 'KYC Case' })
 export class KycCase implements KycCaseModel {
     @Field(() => ID)
@@ -62,8 +60,16 @@ export class KycCase implements KycCaseModel {
     customer: CustomerModel;
     @Field(() => [Document])
     documents: DocumentModel[];
-    @Field(() => [Comment])
-    comments: CommentModel[];
+    @Field(() => Person, {nullable: true})
+    counterparty: PersonModel;
+    @Field({nullable: true})
+    customerOutreach: string;
+    @Field(() => NegativeScreening, {nullable: true})
+    negativeScreening: NegativeScreeningModel;
+    @Field(() => NegativeScreening, {nullable: true})
+    counterpartyNegativeScreening: NegativeScreeningModel;
+    @Field(() => CustomerRiskAssessment, {nullable: true})
+    customerRiskAssessment: CustomerRiskAssessmentModel;
 }
 
 @InputType()
@@ -71,7 +77,47 @@ export class CustomerInput implements CustomerModel {
     @Field()
     name: string;
     @Field()
-    dateOfBirth: string;
+    countryOfResidence: string;
+    @Field()
+    personalIdentificationNumber: string;
+    @Field()
+    riskCategory: string;
+}
+
+@InputType()
+export class PersonInput implements PersonModel {
+    @Field()
+    name: string;
     @Field()
     countryOfResidence: string;
+}
+
+@InputType()
+export class ReviewCaseInput implements ReviewCaseModel {
+    @Field(() => ID)
+    id: string
+    @Field(() => PersonInput)
+    counterparty: PersonModel
+    @Field({nullable: true})
+    customerOutreach: string;
+    @Field(() => [DocumentInput])
+    documents: DocumentModel[];
+}
+
+@InputType()
+export class ApproveCaseInput implements ApproveCaseModel {
+    @Field(() => ID)
+    id: string
+    @Field()
+    customerOutreach: string;
+    @Field(() => [DocumentInput])
+    documents: DocumentModel[];
+}
+
+@InputType()
+export class DocumentInput implements DocumentInputModel {
+    @Field()
+    name: string;
+    @Field()
+    path: string;
 }

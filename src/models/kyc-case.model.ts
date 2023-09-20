@@ -1,3 +1,5 @@
+import * as Stream from "stream";
+
 export interface KycCaseModel {
     id: string;
     status: string;
@@ -8,6 +10,7 @@ export interface KycCaseModel {
     negativeScreening?: NegativeScreeningModel;
     counterpartyNegativeScreening?: NegativeScreeningModel;
     customerRiskAssessment?: CustomerRiskAssessmentModel;
+    caseSummary?: KycCaseSummaryModel;
 }
 
 export interface PersonModel {
@@ -17,22 +20,23 @@ export interface PersonModel {
 
 export interface CustomerModel extends PersonModel {
     personalIdentificationNumber: string;
-    riskCategory: string;
-    entityType: string;
     industryType: string;
+    entityType: string;
 }
 
 export interface DocumentModel extends DocumentInputModel {
-    id: string;
+    content: Buffer;
 }
 
 export interface NegativeScreeningModel {
     result: string;
+    error?: string;
 }
 
 export interface CustomerRiskAssessmentModel {
     rating: string;
     score: number;
+    error?: string;
 }
 
 export interface ReviewCaseModel {
@@ -48,7 +52,37 @@ export interface ApproveCaseModel {
     documents: DocumentModel[];
 }
 
+export interface KycCaseSummaryModel {
+    summary: string;
+    error?: string;
+}
+
+export interface DocumentRef {
+    url: string;
+}
+
+export const isDocumentRef = (val: any): val is DocumentRef => {
+    return !!val && !!val.url;
+}
+
+export interface DocumentContent {
+    content: Buffer;
+}
+
+export const isDocumentContent = (val: any): val is DocumentContent => {
+    return !!val && !!val.content;
+}
+
+export interface DocumentStream {
+    stream: Stream;
+}
+
+export const isDocumentStream = (val: any): val is DocumentStream => {
+    return !!val && !!val.stream;
+}
+
 export interface DocumentInputModel {
+    id: string;
     name: string;
     path: string;
 }
@@ -60,7 +94,6 @@ export const createEmptyCase = (): KycCaseModel => {
             name: '',
             countryOfResidence: 'US',
             personalIdentificationNumber: '',
-            riskCategory: '',
             industryType: '',
             entityType: '',
         },

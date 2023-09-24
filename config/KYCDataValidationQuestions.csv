@@ -13,7 +13,7 @@ ID,Question,PoCScope,Company,Prompt,Expected Answer,watsonx Response
 12,What is the industry type/SIC/NICS code of the company?,,,,,
 13,What are the products utilized by the company?,,,,,
 14,What is/are operation location/s or jurisdiction/s?,,,,,
-15,Number of employees of the firm,,,,,
+15,What is the Number of employees of the firm,,,,,
 16,Name of the subsidiary of the company,,,,,
 17,What is the Legal entity Type of the organization ex; publicly traded/limited liability etc.,,,,,
 18,What is the turnover or revenue of the organization?,,,,,

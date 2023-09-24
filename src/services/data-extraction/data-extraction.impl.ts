@@ -35,7 +35,8 @@ export const buildDataExtractionBackendConfig = (): DataExtractionBackendConfig 
 
         wmlUrl: process.env.WML_URL || 'https://us-south.ml.cloud.ibm.com/ml/v1-beta/generation/text?version=2023-05-28',
         wmlApiKey: process.env.WML_API_KEY,
-        modelId: process.env.MODEL_ID || 'google/flan-ul2',
+        //modelId: process.env.MODEL_ID || 'google/flan-ul2',
+        modelId: process.env.MODEL_ID || "google/flan-t5-xxl",
         wmlProjectId: process.env.WML_PROJECT_ID || '05ba9d92-734e-4b34-a672-f727a2c26440',
 
         decodingMethod: process.env.DECODING_METHOD || 'greedy',

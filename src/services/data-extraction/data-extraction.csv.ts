@@ -7,14 +7,14 @@ import {DataExtractionQuestionModel, DataExtractionResultModel} from "../../mode
 import {first, parseCsv} from "../../utils";
 
 const csvFile: string = `ID,Question,PoCScope,Company,Prompt,Expected Answer,watsonx Response
-1,What is Name and trading name of the organization?,,,,,
+1,What is Name and trading name of the organization?,X,,,,
 2,What is the registered address of the company?,X,BP P.L.C,From below text find the registered address of the company #?,"1 St James's Square, London, SW1Y 4PD","1 St James's Square, London, SW1Y 4PD"
 3,What is the business/trading address of the company?,,,,,
 4,What is identification number of the organization?,X,BP P.L.C,from below text find  identification number of the organization #? ,102498,102498
 5,Who are the key controllers and authorized signatories?,,,,,
-6,Names all the active directors of the company.,X,BP P.L.C,"from below text, find the names of active directors of the company # in sequence ?","LUND, Helge BLANC, Amanda Jayne DALEY, Pamela","LUND, Helge BLANC, Amanda Jayne DALEY, Pamela"
-7,"What is the status of the organization ex; active, dissolved?",X,BP P.L.C,"from below text, what is the status of the organization # ?",Active,Active
-8,What is the year of incorporation?,X,BP P.L.C,"from below text, What is the year of incorporation of #?",1909,1909
+6,Names all the active directors of the company.,X,BP P.L.C,"from below text find the names of active directors of the company # in sequence ?","LUND, Helge BLANC, Amanda Jayne DALEY, Pamela","LUND, Helge BLANC, Amanda Jayne DALEY, Pamela"
+7,"What is the status of the organization ex; active, dissolved?",X,BP P.L.C,"from below text what is the status of the organization # ?",Active,Active
+8,What is the year of incorporation?,X,BP P.L.C,"from below text What is the year of incorporation of #?",1909,1909
 9,Who are the shareholders of the company along with the percentage of ownership?,,,,,
 10,Who is the ultimate owner of the company?,,,,,
 11,Who are the key controllers and authorized signatories?,,,,,

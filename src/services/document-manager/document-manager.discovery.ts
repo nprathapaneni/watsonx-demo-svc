@@ -10,9 +10,8 @@ import {
 import {buildDataExtractionBackendConfig, DataExtractionBackendConfig} from "../data-extraction/data-extraction.impl";
 import {createDiscoveryV2} from "../../utils/discovery-v2";
 import {getType} from "mime";
-import {FileUploadContext} from "../../models";
+import {DocumentModel, FileUploadContext} from "../../models";
 import {first} from "../../utils";
-
 
 export class DocumentManagerDiscovery implements DocumentManagerApi {
     backendConfig: DataExtractionBackendConfig;
@@ -62,6 +61,8 @@ export class DocumentManagerDiscovery implements DocumentManagerApi {
 
         const {discovery} = await this.getBackends();
 
+        console.log('Uploading file: ', {name: input.name});
+
         const result = await discovery
             .addDocument({
                 projectId,
@@ -80,11 +81,11 @@ export class DocumentManagerDiscovery implements DocumentManagerApi {
         return {
             id,
             name: input.name,
-            path: `${id}/${input.name}`
+            path: buildPath(id, input.name)
         };
     }
 
-    getDiscoveryConfig(context?: FileUploadContext): {collectionId: string, projectId: string} {
+    getDiscoveryConfig(context: FileUploadContext = 'kyc-case'): {collectionId: string, projectId: string} {
         if (context === 'data-extraction') {
             return {
                 projectId: this.backendConfig.discoveryProjectId,
@@ -93,7 +94,7 @@ export class DocumentManagerDiscovery implements DocumentManagerApi {
         }
 
         return {
-            projectId: this.backendConfig.discoveryProjectId,
+            projectId: this.backendConfig.kycProjectId,
             collectionId: this.backendConfig.kycCollectionId
         }
     }
@@ -102,4 +103,78 @@ export class DocumentManagerDiscovery implements DocumentManagerApi {
         return first(path.split('/')) || path;
     }
 
+    async listFiles(input: {statuses?: string[], context?: FileUploadContext, ids?: string[]} = {}): Promise<DocumentOutputModel[]> {
+        const config = this.getDiscoveryConfig(input.context);
+
+        const {discovery} = await this.getBackends();
+
+        const status = extractStatuses(input.statuses)
+
+        const ids = input.ids;
+
+        console.log('Listing files: ', {context: input.context, status, config, ids})
+        if (!ids || ids.length > 3) {
+            return getDocumentsByStatus(discovery, config, status, ids)
+        } else {
+            return getDocumentsById(discovery, config, status, ids)
+        }
+    }
+}
+
+const statusValues = ['failed', 'pending', 'processing', 'available'];
+
+const extractStatuses = (statuses: string[] = []): string[] => {
+    console.log('Filtering statuses: ', {statuses})
+    const status = statuses.filter(val => statusValues.includes(val));
+    console.log('Filtered status: ', {status})
+
+    if (status.length === 0) {
+        return ['failed', 'pending', 'processing'];
+    }
+
+    return status;
+}
+
+const buildPath = (id: string, name?: string): string | undefined => {
+    if (!name) {
+        return
+    }
+
+    return `${id}/${name}`;
+}
+
+interface Config {
+    collectionId: string;
+    projectId: string;
+}
+
+const getDocumentsByStatus = async (discovery: DiscoveryV2, {collectionId, projectId}: Config, statuses: string[], ids?: string[]): Promise<DocumentModel[]> => {
+    return (await Promise.all(statuses
+        .map(status => discovery
+            .listDocuments({collectionId, projectId, status})
+            .then(response => response.result.documents)
+            .then(documents => documents.map(document => ({
+                id: document.document_id,
+                status,
+                name: document.filename,
+                path: '',
+                content: Buffer.from(''),
+            })))
+        )))
+        .reduce((result: DocumentModel[], current: DocumentModel[]) => {
+            return result.concat(...current);
+        }, [])
+}
+
+const getDocumentsById = async (discovery: DiscoveryV2, {collectionId, projectId}: Config, status: string[], ids: string[]): Promise<DocumentModel[]> => {
+    return Promise.all(ids.map(documentId => discovery
+        .getDocument({collectionId, projectId, documentId})
+        .then(response => ({
+            id: response.result.document_id,
+            name: response.result.filename,
+            status: response.result.status,
+            path: '',
+            content: Buffer.from(''),
+        }))
+    ))
 }

@@ -2,11 +2,19 @@ import {Field, ID, InputType, ObjectType} from "@nestjs/graphql";
 import {
     ApproveCaseModel,
     CustomerModel,
-    CustomerRiskAssessmentModel, DocumentInputModel,
-    DocumentModel,
-    KycCaseModel, KycCaseSummaryModel,
-    NegativeScreeningModel, NewsItemModel, PersonModel, ReviewCaseModel
+    CustomerRiskAssessmentModel,
+    DocumentInputModel,
+    DocumentModel, FileUploadContext,
+    KycCaseChangeEventThinModel,
+    KycCaseChangeType,
+    KycCaseModel,
+    KycCaseSummaryModel,
+    NegativeScreeningModel,
+    NewsItemModel,
+    PersonModel,
+    ReviewCaseModel
 } from "../models";
+import {DocumentOutputModel} from "../services";
 
 @ObjectType({description: 'KYC Customer'})
 export class Customer implements CustomerModel {
@@ -127,6 +135,18 @@ export class KycCaseSummary implements KycCaseSummaryModel {
     error: string;
 }
 
+@ObjectType()
+export class DocumentOutput implements DocumentOutputModel {
+    @Field(() => ID)
+    id: string;
+    @Field({nullable: true})
+    name: string;
+    @Field({nullable: true})
+    path: string;
+    @Field({nullable: true})
+    status: string;
+}
+
 @InputType()
 export class CustomerInput implements CustomerModel {
     @Field()
@@ -179,4 +199,20 @@ export class DocumentInput implements DocumentInputModel {
     name: string;
     @Field()
     path: string;
+}
+
+@ObjectType()
+export class KycCaseChangeEvent implements KycCaseChangeEventThinModel {
+    @Field(() => String)
+    event: KycCaseChangeType;
+    @Field(() => ID)
+    caseId: string;
+}
+
+@InputType()
+export class ListDocumentInput {
+    @Field(() => String, {nullable: true})
+    context?: FileUploadContext;
+    @Field(() => [String], {nullable: true})
+    statuses?: string[]
 }

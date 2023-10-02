@@ -39,7 +39,7 @@ export const buildDataExtractionBackendConfig = (): DataExtractionBackendConfig 
         wmlProjectId: process.env.WML_PROJECT_ID || '05ba9d92-734e-4b34-a672-f727a2c26440',
 
         decodingMethod: process.env.DECODING_METHOD || 'greedy',
-        maxNewTokens: parseInt(process.env.MAX_NEW_TOKENS || '20'),
+        maxNewTokens: parseInt(process.env.MAX_NEW_TOKENS || '100'),
         repetitionPenalty: parseInt(process.env.REPETITION_PENALTY || '1'),
 
         discoveryUrl: process.env.DISCOVERY_URL || 'https://api.us-south.discovery.watson.cloud.ibm.com/instances/0992769e-726a-4ab0-a9d9-4352e204cc87',
@@ -106,7 +106,7 @@ export class DataExtractionImpl extends DataExtractionCsv<WatsonBackends> implem
         const response: DiscoveryV2.Response<DiscoveryV2.QueryResponse> = await backends.discovery.query({
             projectId: this.backendConfig.discoveryProjectId,
             naturalLanguageQuery,
-            count: 3,
+            count: 5,
             passages: {
                 enabled: true,
                 per_document: passagesPerDocument,
